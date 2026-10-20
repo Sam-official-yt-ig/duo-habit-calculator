@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duo-Habit & Streak Tracker ⚡</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top left, #1a1c29, #08090d),
+                  linear-gradient(135deg, #0d1117 0%, #161b22 50%, #050508 100%);
+      color: #c9d1d9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(22, 27, 34, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(88, 166, 255, 0.2);
+      border-radius: 16px;
+      padding: 25px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), 0 0 15px rgba(56, 189, 248, 0.1);
+    }
+    h2 { text-align: center; color: #58a6ff; margin-top: 0; }
+    
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    input, select {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      background: #0d1117;
+      color: white;
+      font-size: 14px;
+    }
+    .streak-container {
+      text-align: center;
+      background: rgba(33, 38, 45, 0.7);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      border: 1px solid #30363d;
+    }
+    .streak-count {
+      font-size: 48px;
+      font-weight: bold;
+      color: #ff7b72;
+      margin: 5px 0;
+    }
+    .user-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0d1117;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #21262d;
+    }
+    .habit-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #79c0ff;
+    }
+    .status-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-pending { background: #238636; color: white; }
+    .btn-pending:hover { background: #2ea043; }
+    .btn-done { background: #30363d; color: #8b949e; cursor: default; }
+    .add-btn {
+      width: 100%;
+      padding: 10px;
+      background: #238636;
+      border: 1px solid #2ea043;
+      color: white;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    .add-btn:hover { background: #2ea043; }
+    .reset-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid #da3633;
+      color: #f85149;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    .reset-btn:hover { background: rgba(218, 54, 51, 0.1); }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>⚡ Multi-Habit Tracker</h2>
+    
+    <!-- Custom Time Period Selector -->
+    <div style="margin-bottom: 15px;">
+      <label style="font-size: 12px; color: #8b949e; display: block; margin-bottom: 5px;">TIME PERIOD TARGET</label>
+      <select id="timePeriod" onchange="updateLabels()">
+        <option value="Seconds">Seconds</option>
+        <option value="Minutes">Minutes</option>
+        <option value="Hours">Hours</option>
+      </select>
+    </div>
+
+    <!-- Inputs Container -->
+    <div id="inputsContainer">
+      <div class="input-group">
+        <input type="text" class="p-name" placeholder="P1 Name" onchange="updateLabels()">
+        <input type="text" class="p-habit" placeholder="P1 Quest" onchange="updateLabels()">
+      </div>
+      <div class="input-group">
+        <input type="text" class="p-name" placeholder="P2 Name" onchange="updateLabels()">
+        <input type="text" class="p-habit" placeholder="P2 Quest" onchange="updateLabels()">
+      </div>
+      <div class="input-group">
+        <input type="text" class="p-name" placeholder="P3 Name" onchange="updateLabels()">
+        <input type="text" class="p-habit" placeholder="P3 Quest" onchange="updateLabels()">
+      </div>
+    </div>
+
+    <button class="add-btn" onclick="addPlayer()">+ Add New Player</button>
+
+    <div class="streak-container">
+      <div style="font-size: 14px; color: #8b949e;" id="streakTitle">SHARED SECONDS STREAK</div>
+      <div class="streak-count" id="streakDisplay">🔥 0 Secs</div>
+      <div style="font-size: 13px; color: #7ee787;" id="statusMessage">All group members must complete their quest!</div>
+    </div>
+
+    <!-- Player Action Rows -->
+    <div id="rowsContainer">
+      <div class="user-row" id="row-0">
+        <div>
+          <strong class="lbl-name">Player 1</strong>
+          <div class="habit-title lbl-habit">⚡ Quest 1</div>
+        </div>
+        <button class="status-btn btn-pending" onclick="completeHabit(0)">Complete</button>
+      </div>
+      <div class="user-row" id="row-1">
+        <div>
+          <strong class="lbl-name">Player 2</strong>
+          <div class="habit-title lbl-habit">⚡ Quest 2</div>
+        </div>
+        <button class="status-btn btn-pending" onclick="completeHabit(1)">Complete</button>
+      </div>
+      <div class="user-row" id="row-2">
+        <div>
+          <strong class="lbl-name">Player 3</strong>
+          <div class="habit-title lbl-habit">⚡ Quest 3</div>
+        </div>
+        <button class="status-btn btn-pending" onclick="completeHabit(2)">Complete</button>
+      </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetStreak()">Reset Streak</button>
+  </div>
+
+  <script>
+    let playerStatus = [false, false, false];
+    let streak = 0;
+
+    function addPlayer() {
+      const count = playerStatus.length + 1;
+      playerStatus.push(false);
+
+      // Add Input Group
+      const inputGroup = document.createElement('div');
+      inputGroup.className = 'input-group';
+      inputGroup.innerHTML = `
+        <input type="text" class="p-name" placeholder="P${count} Name" onchange="updateLabels()">
+        <input type="text" class="p-habit" placeholder="P${count} Quest" onchange="updateLabels()">
+      `;
+      document.getElementById('inputsContainer').appendChild(inputGroup);
+
+      // Add Row
+      const row = document.createElement('div');
+      row.className = 'user-row';
+      row.id = `row-${count - 1}`;
+      row.innerHTML = `
+        <div>
+          <strong class="lbl-name">Player ${count}</strong>
+          <div class="habit-title lbl-habit">⚡ Quest ${count}</div>
+        </div>
+        <button class="status-btn btn-pending" onclick="completeHabit(${count - 1})">Complete</button>
+      `;
+      document.getElementById('rowsContainer').appendChild(row);
+
+      updateLabels();
+    }
+
+    function updateLabels() {
+      const names = document.querySelectorAll('.p-name');
+      const habits = document.querySelectorAll('.p-habit');
+      const lblNames = document.querySelectorAll('.lbl-name');
+      const lblHabits = document.querySelectorAll('.lbl-habit');
+      const period = document.getElementById('timePeriod').value;
+
+      names.forEach((el, index) => {
+        const val = el.value.trim();
+        lblNames[index].innerText = val || `Player ${index + 1}`;
+      });
+
+      habits.forEach((el, index) => {
+        const val = el.value.trim();
+        lblHabits[index].innerText = val || `⚡ Quest ${index + 1}`;
+      });
+
+      const unit = period === 'Seconds' ? 'Secs' : period === 'Minutes' ? 'Mins' : 'Hours';
+      document.getElementById('streakTitle').innerText = `SHARED ${period.toUpperCase()} STREAK`;
+      document.getElementById('streakDisplay').innerText = `🔥 ${streak} ${unit}`;
+    }
+
+    function completeHabit(index) {
+      if (!playerStatus[index]) {
+        playerStatus[index] = true;
+        const row = document.getElementById(`row-${index}`);
+        const btn = row.querySelector('.status-btn');
+        btn.innerText = 'Unlocked 🏆';
+        btn.className = 'status-btn btn-done';
+      }
+
+      checkBothDone();
+    }
+
+    function checkBothDone() {
+      const allDone = playerStatus.every(status => status === true);
+      if (allDone && playerStatus.length > 0) {
+        streak += 1;
+        const period = document.getElementById('timePeriod').value;
+        const unit = period === 'Seconds' ? 'Secs' : period === 'Minutes' ? 'Mins' : 'Hours';
+        document.getElementById('streakDisplay').innerText = `🔥 ${streak} ${unit}`;
+        document.getElementById('statusMessage').innerText = '🚀 All Quests Completed! Multiplier Active!';
+      }
+    }
+
+    function resetStreak() {
+      streak = 0;
+      playerStatus = playerStatus.map(() => false);
+      
+      const period = document.getElementById('timePeriod').value;
+      const unit = period === 'Seconds' ? 'Secs' : period === 'Minutes' ? 'Mins' : 'Hours';
+      document.getElementById('streakDisplay').innerText = `🔥 0 ${unit}`;
+      document.getElementById('statusMessage').innerText = 'All group members must complete their quest!';
+      
+      const buttons = document.querySelectorAll('#rowsContainer .status-btn');
+      buttons.forEach(btn => {
+        btn.innerText = 'Complete';
+        btn.className = 'status-btn btn-pending';
+      });
+    }
+  </script>
+
+</body>
+</html>
